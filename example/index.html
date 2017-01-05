@@ -242,7 +242,7 @@
         audience: 'urn:test'
       }, function(err, data) {
         htmlConsole.dumpCallback.bind(htmlConsole)(err, data);
-        this.webAuth.client.userInfo(data.access_token, htmlConsole.dumpCallback.bind(htmlConsole));
+        this.webAuth.client.userInfo(data.accessToken, htmlConsole.dumpCallback.bind(htmlConsole));
       });
     });
 
