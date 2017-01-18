@@ -18,6 +18,7 @@
     "test:watch": "mocha --watch  -R min test/**/*.test.js",
     "test:coverage": "istanbul cover _mocha -R test/**/*",
     "test:ci": "istanbul cover _mocha --report lcovonly -R test/**/*; codecov",
+    "test:browser": "wdio",
     "lint": "eslint ./src",
     "publish:cdn": "ccu",
     "release": "scripts/release.sh"
@@ -52,6 +53,9 @@
     "sinon": "^1.17.6",
     "smart-banner-webpack-plugin": "^2.0.0",
     "unminified-webpack-plugin": "^1.1.1",
+    "wdio-mocha-framework": "^0.5.8",
+    "wdio-phantomjs-service": "^0.2.2",
+    "webdriverio": "^4.6.1",
     "webpack": "^1.13.2",
     "webpack-core": "^0.6.8",
     "webpack-custom-var-library-name-plugin": "^1.0.0",
