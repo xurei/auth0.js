@@ -72,7 +72,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	/* eslint-disable no-param-reassign */
+	/* eslint-disable no-restricted-syntax */
+	/* eslint-disable guard-for-in */
 	
+	var assert = __webpack_require__(2);
 	var objectAssign = __webpack_require__(36);
 	
 	function pick(object, keys) {
@@ -86,7 +89,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function objectValues(obj) {
 	  var values = [];
-	  for (key in obj) {
+	  for (var key in obj) {
 	    values.push(obj[key]);
 	  }
 	  return values;
@@ -148,21 +151,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	function toSnakeCase(object, exceptions) {
+	  if (typeof object !== 'object' || assert.isArray(object) || !object === null) {
+	    return object;
+	  }
+	
 	  exceptions = exceptions || [];
 	
 	  return Object.keys(object).reduce(function (p, key) {
 	    var newKey = exceptions.indexOf(key) === -1 ? camelToSnake(key) : key;
-	    p[newKey] = typeof(object[key]) === 'object' ? toSnakeCase(object[key]) : object[key];
+	    p[newKey] = toSnakeCase(object[key]);
 	    return p;
 	  }, {});
 	}
 	
 	function toCamelCase(object, exceptions) {
+	  if (typeof object !== 'object' || assert.isArray(object) || !object === null) {
+	    return object;
+	  }
+	
 	  exceptions = exceptions || [];
 	
 	  return Object.keys(object).reduce(function (p, key) {
 	    var newKey = exceptions.indexOf(key) === -1 ? snakeToCamel(key) : key;
-	    p[newKey] = typeof(object[key]) === 'object' ? toCamelCase(object[key]) : object[key];
+	    p[newKey] = toCamelCase(object[key]);
 	    return p;
 	  }, {});
 	}
@@ -181,25 +192,75 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {function redirect(url) {
-	  global.window.location = url;
+	var toString = Object.prototype.toString;
+	
+	function attribute(o, attr, type, text) {
+	  if (o && typeof o[attr] !== type) {
+	    throw new Error(text);
+	  }
 	}
 	
-	function getDocument() {
-	  return global.window.document;
+	function variable(o, type, text) {
+	  if (typeof o !== type) {
+	    throw new Error(text);
+	  }
 	}
 	
-	function getWindow() {
-	  return global.window;
+	function value(o, values, text) {
+	  if (values.indexOf(o) === -1) {
+	    throw new Error(text);
+	  }
+	}
+	
+	function check(o, config, attributes) {
+	  if (!config.optional || o) {
+	    variable(o, config.type, config.message);
+	  }
+	  if (config.type === 'object' && attributes) {
+	    var keys = Object.keys(attributes);
+	
+	    for (var index = 0; index < keys.length; index++) {
+	      var a = keys[index];
+	      if (!attributes[a].optional || o[a]) {
+	        if (!attributes[a].condition || attributes[a].condition(o)) {
+	          attribute(o, a, attributes[a].type, attributes[a].message);
+	          if (attributes[a].values) {
+	            value(o[a], attributes[a].values, attributes[a].value_message);
+	          }
+	        }
+	      }
+	    }
+	  }
+	}
+	
+	/**
+	 * Wrap `Array.isArray` Polyfill for IE9
+	 * source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
+	 *
+	 * @param {Array} array
+	 * @public
+	 */
+	function isArray(array) {
+	  if (this.supportsIsArray()) {
+	    return Array.isArray(array);
+	  }
+	
+	  return toString.call(array) === '[object Array]';
+	}
+	
+	function supportsIsArray() {
+	  return (Array.isArray != null);
 	}
 	
 	module.exports = {
-	  redirect: redirect,
-	  getDocument: getDocument,
-	  getWindow: getWindow
+	  check: check,
+	  attribute: attribute,
+	  variable: variable,
+	  value: value,
+	  isArray: isArray,
+	  supportsIsArray: supportsIsArray
 	};
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
 
 /***/ },
 /* 3 */
@@ -249,76 +310,25 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports) {
 
-	var toString = Object.prototype.toString;
-	
-	function attribute(o, attr, type, text) {
-	  if (o && typeof o[attr] !== type) {
-	    throw new Error(text);
-	  }
+	/* WEBPACK VAR INJECTION */(function(global) {function redirect(url) {
+	  global.window.location = url;
 	}
 	
-	function variable(o, type, text) {
-	  if (typeof o !== type) {
-	    throw new Error(text);
-	  }
+	function getDocument() {
+	  return global.window.document;
 	}
 	
-	function value(o, values, text) {
-	  if (values.indexOf(o) === -1) {
-	    throw new Error(text);
-	  }
-	}
-	
-	function check(o, config, attributes) {
-	  if (!config.optional || o) {
-	    variable(o, config.type, config.message);
-	  }
-	  if (config.type === 'object' && attributes) {
-	    var keys = Object.keys(attributes);
-	
-	    for (var index = 0; index < keys.length; index++ ) {
-	      var a = keys[index];
-	      if (!attributes[a].optional || o[a]) {
-	        if (!attributes[a].condition || attributes[a].condition(o)) {
-	          attribute(o, a, attributes[a].type, attributes[a].message);
-	          if (attributes[a].values) {
-	            value(o[a], attributes[a].values, attributes[a].value_message);
-	          }
-	        }
-	      }
-	    }
-	
-	  }
-	}
-	
-	/**
-	 * Wrap `Array.isArray` Polyfill for IE9
-	 * source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
-	 *
-	 * @param {Array} array
-	 * @public
-	 */
-	function isArray(array) {
-	  if (this.supportsIsArray()) {
-	    return Array.isArray(array);
-	  }
-	
-	  return toString.call(array) === '[object Array]';
-	}
-	
-	function supportsIsArray() {
-	  return (Array.isArray != null);
+	function getWindow() {
+	  return global.window;
 	}
 	
 	module.exports = {
-	  check: check,
-	  attribute: attribute,
-	  variable: variable,
-	  value: value,
-	  isArray: isArray,
-	  supportsIsArray: supportsIsArray
+	  redirect: redirect,
+	  getDocument: getDocument,
+	  getWindow: getWindow
 	};
-
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 5 */
@@ -327,7 +337,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var error = __webpack_require__(15);
 	var objectHelper = __webpack_require__(1);
 	
-	function wrapCallback(cb) {
+	function wrapCallback(cb, options) {
+	  options = options || {};
+	  options.ignoreCasing = options.ignoreCasing ? options.ignoreCasing : false;
+	
 	  return function (err, data) {
 	    var errObj;
 	
@@ -375,7 +388,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return cb(errObj);
 	    }
 	
-	    return cb(null, ((data.type && data.type === 'text/html') ? data.text : objectHelper.toCamelCase(data.body || data)));
+	    if (data.type && (data.type === 'text/html' || data.type === 'text/plain')) {
+	      return cb(null, data.text);
+	    }
+	
+	    if (options.ignoreCasing) {
+	      return cb(null, data.body || data);
+	    }
+	
+	    return cb(null, objectHelper.toCamelCase(data.body || data));
 	  };
 	}
 	
@@ -386,6 +407,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 6 */
 /***/ function(module, exports) {
 
+	/* eslint-disable no-console */
+	
 	function Warn(options) {
 	  this.disableWarnings = options.disableWarnings;
 	}
@@ -399,6 +422,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	module.exports = Warn;
+
 
 /***/ },
 /* 7 */
@@ -1501,10 +1525,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._setTimeouts();
 	
 	  // initiate request
-	  if (this.username && this.password) {
-	    xhr.open(this.method, this.url, true, this.username, this.password);
-	  } else {
-	    xhr.open(this.method, this.url, true);
+	  try {
+	    if (this.username && this.password) {
+	      xhr.open(this.method, this.url, true, this.username, this.password);
+	    } else {
+	      xhr.open(this.method, this.url, true);
+	    }
+	  } catch (err) {
+	    // see #1149
+	    return this.callback(err);
 	  }
 	
 	  // CORS
@@ -1676,7 +1705,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var RequestBuilder = __webpack_require__(9);
 	var qs = __webpack_require__(8);
 	var objectHelper = __webpack_require__(1);
-	var assert = __webpack_require__(4);
+	var assert = __webpack_require__(2);
 	var responseHandler = __webpack_require__(5);
 	var parametersWhitelist = __webpack_require__(37);
 	var Warn = __webpack_require__(6);
@@ -1758,9 +1787,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    responseType: { type: 'string', message: 'responseType option is required' },
 	    nonce: { type: 'string', message: 'nonce option is required', condition: function(o) {
 	      return o.responseType.indexOf('code') === -1 && o.responseType.indexOf('id_token') !== -1;
-	    } },
-	    state: { type: 'string', message: 'state option is required', condition: function(o) {
-	      return o.responseType.indexOf('code') === -1;
 	    } },
 	    scope: { optional: true, type: 'string', message: 'scope option is required' },
 	    audience: { optional: true, type: 'string', message: 'audience option is required' }
@@ -1984,7 +2010,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  url = urljoin(this.baseOptions.rootUrl, 'user', 'ssodata', params);
 	
 	  return this.request
-	    .get(url, {noHeaders: true})
+	    .get(url, { noHeaders: true })
 	    .withCredentials()
 	    .end(responseHandler(cb));
 	};
@@ -2007,7 +2033,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return this.request
 	    .get(url)
 	    .set('Authorization', 'Bearer ' + accessToken)
-	    .end(responseHandler(cb));
+	    .end(responseHandler(cb, { ignoreCasing: true }));
 	};
 	
 	/**
@@ -2089,7 +2115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	function byteArrayToString(array) {
-	  var result = "";
+	  var result = '';
 	  for (var i = 0; i < array.length; i++) {
 	    result += String.fromCharCode(array[i]);
 	  }
@@ -2104,7 +2130,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function decode(str) {
 	  str = padding(str)
-	    .replace(/\-/g, '+') // Convert '-' to '+'
+	    .replace(/-/g, '+') // Convert '-' to '+'
 	    .replace(/_/g, '/'); // Convert '_' to '/'
 	
 	  return byteArrayToString(base64.toByteArray(str));
@@ -2141,7 +2167,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ function(module, exports) {
 
-	module.exports = {raw:"8.0.1"};
+	module.exports = { raw:'8.1.1' };
 
 
 /***/ },
@@ -2182,14 +2208,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	TransactionManager.prototype.generateTransaction = function (appState, state, nonce) {
-	  var transaction;
-	  var nonce;
-	
-	  transaction = state || random.randomString(this.keyLength);
+	  var transaction = state || random.randomString(this.keyLength);
 	  nonce = nonce || random.randomString(this.keyLength);
 	
 	  storage.setItem(this.namespace + transaction, {
-	    nonce:nonce,
+	    nonce: nonce,
 	    appState: appState
 	  });
 	
@@ -5205,7 +5228,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Promise support
 	 *
 	 * @param {Function} resolve
-	 * @param {Function} reject
+	 * @param {Function} [reject]
 	 * @return {Request}
 	 */
 	
@@ -5360,6 +5383,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    throw new Error('.field(name, val) name can not be empty');
 	  }
 	
+	  if (this._data) {
+	    console.error(".field() can't be used if .send() is used. Please use only .send() or only .field() & .attach()");
+	  }
+	
 	  if (isObject(name)) {
 	    for (var key in name) {
 	      this.field(key, name[key]);
@@ -5495,6 +5522,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	RequestBase.prototype.send = function(data){
 	  var isObj = isObject(data);
 	  var type = this._header['content-type'];
+	
+	  if (this._formData) {
+	    console.error(".send() can't be used if .attach() or .field() is used. Please use only .send() or only .field() & .attach()");
+	  }
 	
 	  if (isObj && !this._data) {
 	    if (Array.isArray(data)) {
@@ -6137,7 +6168,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var urljoin = __webpack_require__(3);
 	
 	var objectHelper = __webpack_require__(1);
-	var assert = __webpack_require__(4);
+	var assert = __webpack_require__(2);
 	var responseHandler = __webpack_require__(5);
 	
 	function DBConnection(request, options) {
@@ -6218,7 +6249,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var urljoin = __webpack_require__(3);
 	
 	var objectHelper = __webpack_require__(1);
-	var assert = __webpack_require__(4);
+	var assert = __webpack_require__(2);
 	var qs = __webpack_require__(8);
 	var responseHandler = __webpack_require__(5);
 	
@@ -6241,21 +6272,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /* eslint-disable */
 	  assert.check(options, { type: 'object', message: 'options parameter is not valid' }, {
 	    connection: { type: 'string', message: 'connection option is required' },
-	    type: { type: 'string', message: 'type option is required', values: ['sms', 'email'],
-	            value_message: 'type is not valid ([email,sms])' },
 	    verificationCode: { type: 'string', message: 'verificationCode option is required' },
-	    phoneNumber: { required: true, type: 'string', message: 'phoneNumber option is required',
-	            condition: function (o) { return o.type === 'sms'; } },
-	    email: { required: true, type: 'string', message: 'email option is required',
-	            condition: function (o) { return o.type === 'email'; } }
+	    phoneNumber: { optional: false, type: 'string', message: 'phoneNumber option is required',
+	            condition: function (o) { return !o.email; } },
+	    email: { optional: false, type: 'string', message: 'email option is required',
+	            condition: function (o) { return !o.phoneNumber; } }
 	  });
 	  /* eslint-enable */
-	
-	  assert.check(options, {
-	    optional: true,
-	    type: 'object',
-	    message: 'options parameter is not valid'
-	  });
 	
 	  params = objectHelper.merge(this.baseOptions, [
 	    'clientID',
@@ -6265,8 +6288,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'scope',
 	    'audience'
 	  ]).with(options);
-	
-	  params = objectHelper.blacklist(params, ['type']);
 	
 	  // eslint-disable-next-line
 	  if (this.baseOptions._sendTelemetry) {
@@ -6290,30 +6311,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	PasswordlessAuthentication.prototype.start = function (options, cb) {
 	  var url;
 	  var body;
-	  var cleanOption;
 	
 	  /* eslint-disable */
 	  assert.check(options, { type: 'object', message: 'options parameter is not valid' }, {
 	    connection: { type: 'string', message: 'connection option is required' },
-	    type: { type: 'string', message: 'type option is required', values: ['sms', 'email'],
-	            value_message: 'type is not valid ([email,sms])' },
-	    phoneNumber: { required: true, type: 'string', message: 'phoneNumber option is required',
-	            condition: function (o) { return o.type === 'sms'; } },
-	    email: { required: true, type: 'string', message: 'email option is required',
-	            condition: function (o) { return o.type === 'email'; } }
+	    send: { type: 'string', message: 'send option is required', values: ['link', 'code'],
+	            value_message: 'send is not valid ([link, code])' },
+	    phoneNumber: { optional: true, type: 'string', message: 'phoneNumber option is required',
+	            condition: function (o) { return o.send === 'code' || !o.email; } },
+	    email: { optional: true, type: 'string', message: 'email option is required',
+	            condition: function (o) { return o.send === 'link' || !o.phoneNumber; } },
+	    authParams: { optional: true, type: 'object', message: 'authParams option is required' }
 	  });
 	  /* eslint-enable */
 	
 	  assert.check(cb, { type: 'function', message: 'cb parameter is not valid' });
 	
-	  cleanOption = objectHelper.blacklist(options, ['type']);
-	
 	  url = urljoin(this.baseOptions.rootUrl, 'passwordless', 'start');
 	
-	  body = objectHelper.merge(this.baseOptions, ['clientID'])
-	                .with(cleanOption);
+	  body = objectHelper.merge(this.baseOptions, [
+	    'clientID',
+	    'responseType',
+	    'redirectUri',
+	    'scope'
+	  ]).with(options);
 	
-	  body = objectHelper.toSnakeCase(body, ['auth0Client']);
+	  if (body.scope) {
+	    body.authParams = body.authParams || {};
+	    body.authParams.scope = body.scope;
+	  }
+	
+	  if (body.redirectUri) {
+	    body.authParams = body.authParams || {};
+	    body.authParams.redirect_uri = body.redirectUri;
+	  }
+	
+	  if (body.responseType) {
+	    body.authParams = body.authParams || {};
+	    body.authParams.response_type = body.responseType;
+	  }
+	
+	  delete body.redirectUri;
+	  delete body.responseType;
+	  delete body.scope;
+	
+	  body = objectHelper.toSnakeCase(body, ['auth0Client', 'authParams']);
 	
 	  return this.request
 	    .post(url)
@@ -6335,21 +6377,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /* eslint-disable */
 	  assert.check(options, { type: 'object', message: 'options parameter is not valid' }, {
 	    connection: { type: 'string', message: 'connection option is required' },
-	    type: { type: 'string', message: 'type option is required', values: ['sms', 'email'],
-	            value_message: 'type is not valid ([email,sms])' },
 	    verificationCode: { type: 'string', message: 'verificationCode option is required' },
-	    phoneNumber: { required: true, type: 'string', message: 'phoneNumber option is required',
-	            condition: function (o) { return o.type === 'sms'; } },
-	    email: { required: true, type: 'string', message: 'email option is required',
-	            condition: function (o) { return o.type === 'email'; } }
+	    phoneNumber: { optional: false, type: 'string', message: 'phoneNumber option is required',
+	            condition: function (o) { return !o.email; } },
+	    email: { optional: false, type: 'string', message: 'email option is required',
+	            condition: function (o) { return !o.phoneNumber; } }
 	  });
 	  /* eslint-enable */
 	
 	  assert.check(cb, { type: 'function', message: 'cb parameter is not valid' });
 	
-	  cleanOption = objectHelper.blacklist(options, ['type']);
-	
-	  cleanOption = objectHelper.toSnakeCase(cleanOption, ['auth0Client']);
+	  cleanOption = objectHelper.toSnakeCase(options, ['auth0Client']);
 	
 	  url = urljoin(this.baseOptions.rootUrl, 'passwordless', 'verify');
 	
@@ -6366,7 +6404,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var windowHandler = __webpack_require__(2);
+	var windowHandler = __webpack_require__(4);
 	var base64Url = __webpack_require__(14);
 	
 	function create(name, value, days) {
@@ -6430,7 +6468,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var windowHelper = __webpack_require__(2);
+	var windowHelper = __webpack_require__(4);
 	
 	function IframeHandler(options) {
 	  this.auth0 = options.auth0;
@@ -6537,6 +6575,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 36 */
 /***/ function(module, exports) {
 
+	/* eslint-disable no-continue */
+	
 	function get() {
 	  if (!Object.assign) {
 	    return objectAssignPolyfill;
@@ -6575,13 +6615,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  objectAssignPolyfill: objectAssignPolyfill
 	};
 
+
 /***/ },
 /* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var objectHelper = __webpack_require__(1);
 	
-	var token_params = [
+	var tokenParams = [
 	// auth0
 	  'realm',
 	  'audience',
@@ -6601,12 +6642,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'code_verifier'
 	];
 	
-	var authorize_params = [
+	var authorizeParams = [
 	// auth0
 	  'connection',
 	  'connection_scope',
 	  'auth0Client',
 	  'owp',
+	  'device',
 	// oauth2
 	  'client_id',
 	  'response_type',
@@ -6633,11 +6675,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	];
 	
 	function oauthAuthorizeParams(params) {
-	  return objectHelper.pick(params, authorize_params);
+	  return objectHelper.pick(params, authorizeParams);
 	}
 	
 	function oauthTokenParams(params) {
-	  return objectHelper.pick(params, token_params);
+	  return objectHelper.pick(params, tokenParams);
 	}
 	
 	module.exports = {
@@ -6650,9 +6692,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/* eslint-disable no-restricted-syntax */
+	/* eslint-disable guard-for-in */
 	var WinChan = __webpack_require__(31);
 	
-	var windowHandler = __webpack_require__(2);
+	var windowHandler = __webpack_require__(4);
 	var objectHelper = __webpack_require__(1);
 	
 	function PopupHandler() {
@@ -6743,9 +6787,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var windowHelper = __webpack_require__(2);
+	var windowHelper = __webpack_require__(4);
 	
 	function randomString(length) {
+	  // eslint-disable-next-line
 	  var bytes = new Uint8Array(length);
 	  var result = [];
 	  var charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._~';
@@ -6795,7 +6840,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var json = JSON.stringify(value);
 	    return getStorage().setItem(key, json);
 	  },
-	  reload: function() {
+	  reload: function () {
 	    getStorage(true);
 	  }
 	};
@@ -6805,7 +6850,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var windowHandler = __webpack_require__(2);
 	var cookies = __webpack_require__(34);
 	
 	function CookieStorage() {}
@@ -6824,25 +6868,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	module.exports = CookieStorage;
 
+
 /***/ },
 /* 42 */
 /***/ function(module, exports) {
 
 	function DummyStorage() {}
 	
-	DummyStorage.prototype.getItem = function (key) { return null; };
+	DummyStorage.prototype.getItem = function () { return null; };
 	
-	DummyStorage.prototype.removeItem = function (key) {};
+	DummyStorage.prototype.removeItem = function () {};
 	
-	DummyStorage.prototype.setItem = function (key, value) {};
+	DummyStorage.prototype.setItem = function () {};
 	
 	module.exports = DummyStorage;
+
 
 /***/ },
 /* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var windowHandler = __webpack_require__(2);
+	var windowHandler = __webpack_require__(4);
 	var DummyStorage = __webpack_require__(42);
 	var CookieStorage = __webpack_require__(41);
 	var Warn = __webpack_require__(6);
@@ -6905,7 +6951,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var urljoin = __webpack_require__(3);
 	
 	var RequestBuilder = __webpack_require__(9);
-	var assert = __webpack_require__(4);
+	var assert = __webpack_require__(2);
 	var responseHandler = __webpack_require__(5);
 	
 	/**
@@ -6950,7 +6996,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  return this.request
 	    .get(url)
-	    .end(responseHandler(cb));
+	    .end(responseHandler(cb, { ignoreCasing: true }));
 	};
 	
 	/**
@@ -6974,7 +7020,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return this.request
 	    .patch(url)
 	    .send({ user_metadata: userMetadata })
-	    .end(responseHandler(cb));
+	    .end(responseHandler(cb, { ignoreCasing: true }));
 	};
 	
 	/**
@@ -6999,7 +7045,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return this.request
 	    .post(url)
 	    .send({ link_with: secondaryUserToken })
-	    .end(responseHandler(cb));
+	    .end(responseHandler(cb, { ignoreCasing: true }));
 	};
 	
 	module.exports = Management;
@@ -7011,10 +7057,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var IdTokenVerifier = __webpack_require__(25);
 	
-	var assert = __webpack_require__(4);
+	var assert = __webpack_require__(2);
 	var error = __webpack_require__(15);
 	var qs = __webpack_require__(8);
-	var windowHelper = __webpack_require__(2);
+	var windowHelper = __webpack_require__(4);
 	var objectHelper = __webpack_require__(1);
 	var TransactionManager = __webpack_require__(17);
 	var Authentication = __webpack_require__(13);
@@ -7042,8 +7088,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    responseType: { optional: true, type: 'string', message: 'responseType is not valid' },
 	    responseMode: { optional: true, type: 'string', message: 'responseMode is not valid' },
 	    redirectUri: { optional: true, type: 'string', message: 'redirectUri is not valid' },
-	    scope: { optional: true, type: 'string', message: 'audience is not valid' },
-	    audience: { optional: true, type: 'string', message: 'scope is not valid' },
+	    scope: { optional: true, type: 'string', message: 'scope is not valid' },
+	    audience: { optional: true, type: 'string', message: 'audience is not valid' },
+	    leeway: { optional: true, type: 'number', message: 'leeway is not valid' },
 	    _disableDeprecationWarnings: { optional: true, type: 'boolean', message: '_disableDeprecationWarnings option is not valid' },
 	    _sendTelemetry: { optional: true, type: 'boolean', message: '_sendTelemetry option is not valid' },
 	    _telemetryInfo: { optional: true, type: 'object', message: '_telemetryInfo option is not valid' }
@@ -7076,7 +7123,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	/**
-	 * Parse the url hash and extract the access token or id token depending on the transaction.
+	 * Parse the url hash and extract the returned tokens depending on the transaction.
+	 *
+	 * Only validates id_tokens signed by Auth0 using the RS256 algorithm using the public key exposed
+	 * by the `/.well-known/jwks.json` endpoint. Id tokens signed with other algorithms will not be
+	 * accepted.
 	 *
 	 * @method parseHash
 	 * @param {Object} options:
@@ -7088,7 +7139,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	WebAuth.prototype.parseHash = function (options, cb) {
 	  var parsedQs;
 	  var err;
-	  var token;
+	  var state;
+	  var transaction;
+	  var transactionNonce;
+	  var transactionState;
 	
 	  if (!cb && typeof options === 'function') {
 	    cb = options;
@@ -7120,29 +7174,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return cb(null, null);
 	  }
 	
-	  if (parsedQs.id_token) {
-	    this.validateToken(parsedQs.id_token, parsedQs.state || options.state, options.nonce, function (err, response) {
-	      if (err) {
-	        return cb(err);
-	      }
+	  state = parsedQs.state || options.state;
 	
-	      return cb(null, buildParseHashResponse(parsedQs, response));
-	    });
+	  transaction = this.transactionManager.getStoredTransaction(state);
+	  transactionNonce = options.nonce || (transaction && transaction.nonce) || null;
+	  transactionState = options.state || (transaction && transaction.state) || null;
+	
+	  if (parsedQs.id_token) {
+	    this.validateToken(
+	      parsedQs.id_token,
+	      transactionState,
+	      transactionNonce,
+	      function (validationError, payload) {
+	        if (validationError) {
+	          return cb(validationError);
+	        }
+	
+	        return cb(null, buildParseHashResponse(parsedQs, (transaction && transaction.appStatus) || null, payload));
+	      });
 	  } else {
-	    cb(null, buildParseHashResponse(parsedQs, null));
+	    cb(null, buildParseHashResponse(parsedQs, (transaction && transaction.appStatus) || null, null));
 	  }
 	};
 	
-	function buildParseHashResponse(qs, token) {
+	function buildParseHashResponse(qsParams, appStatus, token) {
 	  return {
-	    accessToken: qs.access_token || null,
-	    idToken: qs.id_token || null,
-	    idTokenPayload: token && token.payload ? token.payload : null,
-	    appStatus: token ? token.appStatus || null : null,
-	    refreshToken: qs.refresh_token || null,
-	    state: qs.state || null,
-	    expiresIn: qs.expires_in || null,
-	    tokenType: qs.token_type || null
+	    accessToken: qsParams.access_token || null,
+	    idToken: qsParams.id_token || null,
+	    idTokenPayload: token || null,
+	    appStatus: appStatus || null,
+	    refreshToken: qsParams.refresh_token || null,
+	    state: qsParams.state || null,
+	    expiresIn: qsParams.expires_in ? parseInt(qsParams.expires_in, 10) : null,
+	    tokenType: qsParams.token_type || null
 	  };
 	}
 	
@@ -7156,29 +7220,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Function} cb: function(err, {payload, transaction})
 	 */
 	WebAuth.prototype.validateToken = function (token, state, nonce, cb) {
-	  var audiences;
-	  var transaction;
-	  var transactionNonce;
-	  var tokenNonce;
-	
-	  transaction = this.transactionManager.getStoredTransaction(state);
-	  transactionNonce = (transaction && transaction.nonce) || nonce || null;
-	
 	  var verifier = new IdTokenVerifier({
 	    issuer: this.baseOptions.token_issuer,
 	    audience: this.baseOptions.clientID,
+	    leeway: this.baseOptions.leeway || 0,
 	    __disableExpirationCheck: this.baseOptions.__disableExpirationCheck
 	  });
 	
-	  verifier.verify(token, transactionNonce, function (err, payload) {
+	  verifier.verify(token, nonce, function (err, payload) {
 	    if (err) {
 	      return cb(error.invalidJwt(err.message));
 	    }
 	
-	    cb(null, {
-	      payload: payload,
-	      transaction: transaction
-	    });
+	    cb(null, payload);
 	  });
 	};
 	
@@ -7191,7 +7245,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	WebAuth.prototype.renewAuth = function (options, cb) {
 	  var handler;
-	  var prof;
 	  var usePostMessage = !!options.usePostMessage;
 	  var _this = this;
 	
@@ -7208,10 +7261,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  params = this.transactionManager.process(params);
 	
-	  assert.check(params, { type: 'object', message: 'options parameter is not valid' }, {
-	    scope: { type: 'string', message: 'scope option is required' },
-	    audience: { type: 'string', message: 'audience option is required' }
-	  });
+	  assert.check(params, { type: 'object', message: 'options parameter is not valid' });
 	  assert.check(cb, { type: 'function', message: 'cb parameter is not valid' });
 	
 	  params.prompt = 'none';
@@ -7225,10 +7275,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return cb(err);
 	    }
 	
+	    var transaction = _this.transactionManager.getStoredTransaction(params.state);
+	    var transactionNonce = options.nonce || (transaction && transaction.nonce) || null;
+	    var transactionState = options.state || (transaction && transaction.state) || null;
+	
 	    if (data.id_token) {
-	      return _this.validateToken(data.id_token, options.state, options.nonce, function (err, payload) {
-	        if (err) {
-	          return cb(err);
+	      return _this.validateToken(data.id_token, transactionState, transactionNonce, function (validationErr, payload) {
+	        if (validationErr) {
+	          return cb(validationErr);
 	        }
 	
 	        data.idTokenPayload = payload;
@@ -7368,7 +7422,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var urljoin = __webpack_require__(3);
 	
-	var assert = __webpack_require__(4);
+	var assert = __webpack_require__(2);
 	var responseHandler = __webpack_require__(5);
 	var PopupHandler = __webpack_require__(38);
 	var objectHelper = __webpack_require__(1);
@@ -7406,7 +7460,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (options.popupHandler) {
 	    return options.popupHandler;
 	  }
-	  return !!preload ? this.preload(options) : new PopupHandler();
+	  return preload ? this.preload(options) : new PopupHandler();
 	};
 	
 	/**
@@ -7553,6 +7607,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	module.exports = Popup;
 
+
 /***/ },
 /* 47 */
 /***/ function(module, exports, __webpack_require__) {
@@ -7560,7 +7615,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var UsernamePassword = __webpack_require__(49);
 	var objectHelper = __webpack_require__(1);
 	var Warn = __webpack_require__(6);
-	var assert = __webpack_require__(4);
+	var assert = __webpack_require__(2);
 	
 	function Redirect(client, options) {
 	  this.baseOptions = options;
@@ -7670,7 +7725,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var objectHelper = __webpack_require__(1);
 	var RequestBuilder = __webpack_require__(9);
 	var responseHandler = __webpack_require__(5);
-	var windowHelper = __webpack_require__(2);
+	var windowHelper = __webpack_require__(4);
 	
 	function UsernamePassword(options) {
 	  this.baseOptions = options;
