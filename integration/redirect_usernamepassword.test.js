@@ -1,4 +1,4 @@
-var webdriverio = require('webdriverio');
+var createClient = require('./remote');
 var expect = require('expect.js');
 
 describe('redirect', function () {
@@ -6,8 +6,7 @@ describe('redirect', function () {
   var client;
 
   before(function () {
-    client = webdriverio.remote({ desiredCapabilities: { browserName: 'firefox' } });
-    return client.init();
+    return createClient();
   });
 
   it('with usernamepassword/login', function () {
