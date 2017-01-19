@@ -3,7 +3,7 @@
   <head>
     <title>Auth0.js Demo Examples</title>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="/auth0.js"></script>
+    <script src="auth0.js"></script>
   </head>
   <body class="container">
 
@@ -21,7 +21,7 @@
 
       var webAuth = new auth0.WebAuth({
         domain: 'auth0-tests-auth0js.auth0.com',
-        redirectUri: 'http://localhost:3000/example/test.html',
+        redirectUri: window.location.href,
         clientID: '3GGMIEuBPZ28lb6NBDNARaEZisqFakAs',
         leeway: 30
       });
