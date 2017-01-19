@@ -3,7 +3,7 @@
   <head>
     <title>Auth0.js Demo Examples</title>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="auth0.js"></script>
+    <script src="/auth0.js"></script>
   </head>
   <body class="container">
 
@@ -21,9 +21,9 @@
 
       var webAuth = new auth0.WebAuth({
         domain: 'auth0-tests-auth0js.auth0.com',
-        redirectUri: 'https://auth0.github.io/auth0.js/example/test.html',
+        redirectUri: 'http://localhost:3000/example/test.html',
         clientID: '3GGMIEuBPZ28lb6NBDNARaEZisqFakAs',
-        leeway: 60
+        leeway: 30
       });
 
       $('.login-redirect-usernamepassword').click(function (e) {
@@ -52,10 +52,12 @@
       webAuth.parseHash(function (err, result) {
         if (err) {
           $('#err').html(JSON.stringify(err));
+          $(document.body).append($('<div id="parsed"></div>'));
         }
 
         if (result) {
           $('#result').html(JSON.stringify(result));
+          $(document.body).append($('<div id="parsed"></div>'));
         }
       });
 
