@@ -6,12 +6,13 @@ describe('redirect', function () {
   var client;
 
   before(function () {
-    return createClient();
+    client = createClient();
+    return client.init();
   });
 
   it('with usernamepassword/login', function () {
     client = client
-      .url('http://localhost:3000/example/test.html')
+      .url('https://auth0.github.io/auth0.js/example/test.html')
         .waitForExist('#loaded', 1000)
           .click('.login-redirect-usernamepassword')
         .waitForExist('#loaded', 1000)

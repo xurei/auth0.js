@@ -22,7 +22,8 @@
       var webAuth = new auth0.WebAuth({
         domain: 'auth0-tests-auth0js.auth0.com',
         redirectUri: 'http://localhost:3000/example/test.html',
-        clientID: '3GGMIEuBPZ28lb6NBDNARaEZisqFakAs'
+        clientID: '3GGMIEuBPZ28lb6NBDNARaEZisqFakAs',
+        leeway: 30
       });
 
       $('.login-redirect-usernamepassword').click(function (e) {

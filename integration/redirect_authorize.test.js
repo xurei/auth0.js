@@ -6,12 +6,13 @@ describe('redirect', function () {
   var client;
 
   before(function () {
-    return createClient();
+    client = createClient();
+    return client.init();
   });
 
   it('with hosted login page', function () {
     client = client
-      .url('http://localhost:3000/example/test.html')
+      .url('https://auth0.github.io/auth0.js/example/test.html')
         .waitForExist('#loaded', 1000)
           // .setValue('.login-response-type', 'id_token')
           .click('.login-redirect-authorize')
@@ -21,9 +22,6 @@ describe('redirect', function () {
           .click('#upLogin')
         .waitForExist('#loaded', 5000)
           .waitUntil(function () {
-            client.getUrl().then(function(url){
-              console.log(url)
-            });
             return Promise.all([client.getText('#err'), client.getText('#result')])
               .then(function(values) {
                 return values[0] !== '' || values[1] !== '';
