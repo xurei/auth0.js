@@ -13,14 +13,15 @@ describe('redirect', function () {
   it('with usernamepassword/login', function () {
     client = client
       .url('http://localhost:3000/example/test.html')
-      .waitForExist('.loaded', 1000)
-      .click('.login-redirect-usernamepassword')
-      .waitUntil(function () {
-        return Promise.all([client.getText('#err'), client.getText('#result')])
-          .then(function(values) {
-            return values[0] !== '' || values[1] !== '';
-          });
-      }, 5000)
+        .waitForExist('#loaded', 1000)
+          .click('.login-redirect-usernamepassword')
+        .waitForExist('#loaded', 1000)
+          .waitUntil(function () {
+            return Promise.all([client.getText('#err'), client.getText('#result')])
+              .then(function(values) {
+                return values[0] !== '' || values[1] !== '';
+              });
+          }, 5000);
 
     return Promise.all([client.getText('#err'), client.getText('#result')])
       .then(function(values) {

@@ -8,9 +8,9 @@
   <body class="container">
 
     <input class="login-username" value="johnfoo@gmail.com" />
+    <input type="password" class="login-password" value="1234" />
     <input class="login-scope" value="openid" />
     <input class="login-response-type" value="token" />
-    <input type="password" class="login-password" value="1234" />
     <input type="button" class="login-redirect-usernamepassword" value="redirect usernamepassword" />
     <input type="button" class="login-redirect-authorize" value="redirect authorize" />
 
@@ -59,7 +59,7 @@
       });
 
       $( document ).ready(function() {
-        $(document.body).append($('<div class="loaded">LOADED</div>'));
+        $(document.body).append($('<div id="loaded"></div>'));
       });
     </script>
   </body>
