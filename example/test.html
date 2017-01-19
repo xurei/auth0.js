@@ -20,16 +20,16 @@
     <script type="text/javascript">
 
       var webAuth = new auth0.WebAuth({
-        domain: 'brucke.auth0.com',
+        domain: 'auth0-tests-auth0js.auth0.com',
         redirectUri: 'http://localhost:3000/example/test.html',
-        clientID: 'k5u3o2fiAA8XweXEEX604KCwCjzjtMU6'
+        clientID: '3GGMIEuBPZ28lb6NBDNARaEZisqFakAs'
       });
 
       $('.login-redirect-usernamepassword').click(function (e) {
         e.preventDefault();
 
         webAuth.redirect.loginWithCredentials({
-          connection: 'acme',
+          connection: 'tests',
           username: $('.login-username').val(),
           password: $('.login-password').val(),
           scope: $('.login-scope').val(),
