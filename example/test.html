@@ -21,7 +21,7 @@
 
       var webAuth = new auth0.WebAuth({
         domain: 'auth0-tests-auth0js.auth0.com',
-        redirectUri: 'http://localhost:3000/example/test.html',
+        redirectUri: window.location.href,
         clientID: '3GGMIEuBPZ28lb6NBDNARaEZisqFakAs',
         leeway: 30
       });
@@ -52,10 +52,12 @@
       webAuth.parseHash(function (err, result) {
         if (err) {
           $('#err').html(JSON.stringify(err));
+          $(document.body).append($('<div id="parsed"></div>'));
         }
 
         if (result) {
           $('#result').html(JSON.stringify(result));
+          $(document.body).append($('<div id="parsed"></div>'));
         }
       });
 

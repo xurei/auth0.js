@@ -1,46 +1,26 @@
-var createClient = require('./remote');
-var expect = require('expect.js');
-
-describe('redirect', function () {
-  this.timeout(99999999);
-  var client;
-
-  before(function () {
-    client = createClient();
-    return client.init();
-  });
-
-  it('with usernamepassword/login', function () {
-    client = client
+describe('redirect usernamepassword', function () {
+  // this.timeout(9999999);
+  before(function (client) {
+  // it('should result in a successful transaction', function (client, done) {
+    client
       .url('https://auth0.github.io/auth0.js/example/test.html')
-        .waitForExist('#loaded', 1000)
+        .waitForElementPresent('#loaded', 10000)
           .click('.login-redirect-usernamepassword')
-        .waitForExist('#loaded', 1000)
-          .waitUntil(function () {
-            return Promise.all([client.getText('#err'), client.getText('#result')])
-              .then(function(values) {
-                return values[0] !== '' || values[1] !== '';
-              });
-          }, 5000);
-
-    return Promise.all([client.getText('#err'), client.getText('#result')])
-      .then(function(values) {
-        expect(values[0]).to.eql('');
-
-        var response = JSON.parse(values[1]);
-
-        expect(response.accessToken).to.be.ok();
-        expect(response.idToken).to.be.ok();
-        expect(response.expiresIn).to.be.ok();
-        expect(response.tokenType).to.be.ok();
-        expect(response.idTokenPayload).to.be.ok();
-        expect(response.state).to.not.be.ok();
-        expect(response.refreshToken).to.not.be.ok();
-        expect(response.appStatus).to.not.be.ok();
-      });
+          .waitForElementPresent('#parsed', 10000)
+            // .expect.element('#result').to.not.equal('');
   });
 
-  after(function () {
-    return client.end();
+  it('should result in a successful transaction', function (client) {
+    client.expect.element('#result').to.not.equal('');
+  });
+
+  after(function (client, done) {
+    console.log('END')
+    client.end();
+    // client.end(function() {
+    //   console.log('DONE')
+    //   done();
+    // });
+    // client.customSauceEnd(done);
   });
 });
