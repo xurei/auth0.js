@@ -6,7 +6,7 @@ function PluginHandler() {
 }
 
 PluginHandler.prototype.processParams = function (params) {
-  params.redirectUri = urljoin('https://' + params._domain, 'mobile');
+  params.redirectUri = urljoin('https://' + params.domain, 'mobile');
   delete params.owp;
   return params;
 };

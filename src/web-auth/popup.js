@@ -65,6 +65,7 @@ Popup.prototype.authorize = function (options, cb) {
   var params = objectHelper.merge(this.baseOptions, [
     'clientID',
     'scope',
+    'domain',
     'audience',
     'responseType'
   ]).with(objectHelper.blacklist(options, ['popupHandler']));
@@ -82,6 +83,8 @@ Popup.prototype.authorize = function (options, cb) {
   if (pluginHandler) {
     params = pluginHandler.processParams(params);
   }
+
+  delete params.domain;
 
   url = this.client.buildAuthorizeUrl(params);
 

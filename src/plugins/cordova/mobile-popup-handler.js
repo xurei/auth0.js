@@ -47,7 +47,7 @@ MobilePopupHandler.prototype.load = function (url, _, options, cb) {
     options.url = url;
     this.preload(options);
   } else {
-    this._current_popup.href = url;
+    this._current_popup.location.href = url;
   }
 
   this.transientErrorHandler = function (event) {
