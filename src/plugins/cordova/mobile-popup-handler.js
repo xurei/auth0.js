@@ -1,4 +1,4 @@
-var windowHandler = require('../helper/window');
+var windowHandler = require('../../helper/window');
 
 function MobilePopupHandler() {
   this._current_popup = null;

@@ -18,9 +18,10 @@ var nameOverrides = {
 var files = fs.readdirSync(path.join(__dirname, './src/plugins/'));
 
 for (var a = 0; a < files.length; a++) {
-  var pluginName = getPluginName(files[a]);
-  var className = getClassName(files[a]);
-  entryPoints[pluginName] = ['./src/plugins/' + files[a]];
+  var pluginName = files[a] + '-auth0-plugin';
+  var className = capitalize(files[a]) + 'Auth0Plugin';
+
+  entryPoints[pluginName] = ['./src/plugins/' + files[a] + '/index.js'];
 
   nameOverrides[pluginName] = {
     var: className,
@@ -74,16 +75,6 @@ module.exports = {
   ]
 };
 
-function getPluginName(filename) {
-  var parts = filename.split('.');
-  parts.pop();
-  return parts.join('.') + '-auth0-plugin';
-}
-
-function getClassName(filename) {
-  var parts = filename.split('.');
-  parts.pop();
-  name = parts.join('.');
-  name = name[0].toUpperCase() + name.slice(1);
-  return name + 'Auth0Plugin';
+function capitalize(name) {
+  return name[0].toUpperCase() + name.slice(1);
 }

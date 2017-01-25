@@ -1,5 +1,5 @@
-var version = require('../version');
-var PluginHandler = require('./cordova/plugin-handler');
+var version = require('../../version');
+var PluginHandler = require('./plugin-handler');
 
 function CordovaPlugin() {
   this.version = version.raw;
