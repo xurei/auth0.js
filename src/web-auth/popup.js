@@ -24,8 +24,15 @@ function Popup(client, options) {
  * @param {Object} options: receives the window height and width and any other window feature to be sent to window.open
  */
 Popup.prototype.preload = function (options) {
+  var pluginHandler = this.baseOptions.plugins.get('popup.authorize');
+  var options = options || {};
+
+  if (pluginHandler) {
+    return pluginHandler.preloadPopup(options);
+  }
+
   var popup = new PopupHandler();
-  popup.preload(options || {});
+  popup.preload(options);
   return popup;
 };
 
@@ -53,11 +60,7 @@ Popup.prototype.authorize = function (options, cb) {
   var url;
   var relayUrl;
 
-  var plugin = this.baseOptions.plugins.get('popup.authorize');
-
-  if (plugin) {
-    plugin.init();
-  }
+  var pluginHandler = this.baseOptions.plugins.get('popup.authorize');
 
   var params = objectHelper.merge(this.baseOptions, [
     'clientID',
@@ -76,9 +79,13 @@ Popup.prototype.authorize = function (options, cb) {
 
   params = this.transactionManager.process(params);
 
+  if (pluginHandler) {
+    params = pluginHandler.processParams(params);
+  }
+
   url = this.client.buildAuthorizeUrl(params);
 
-  popup = this.getPopupHandler(options);
+  popup = this.getPopupHandler(options, true);
 
   relayUrl = urljoin(this.baseOptions.rootUrl, 'relay.html');
 

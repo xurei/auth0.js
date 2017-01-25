@@ -1,9 +1,11 @@
 var version = require('../version');
+var PluginHandler = require('./cordova/plugin-handler');
 
 function CordovaPlugin() {
   this.version = version.raw;
   this.extensibilityPoints = [
-    'popup.authorize'
+    'popup.authorize',
+    'popup.preload'
   ];
 }
 
@@ -11,9 +13,8 @@ CordovaPlugin.prototype.supports = function (extensibilityPoint) {
   return this.extensibilityPoints.indexOf(extensibilityPoint) > -1;
 };
 
-
 CordovaPlugin.prototype.init = function () {
-  console.log('CordovaPlugin-init');
+  return new PluginHandler();
 };
 
 module.exports = CordovaPlugin;
