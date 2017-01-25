@@ -53,7 +53,7 @@ Popup.prototype.authorize = function (options, cb) {
   var url;
   var relayUrl;
 
-  var plugin = this.baseOptions.plugins('popup.authorize');
+  var plugin = this.baseOptions.plugins.get('popup.authorize');
 
   if (plugin) {
     plugin.init();

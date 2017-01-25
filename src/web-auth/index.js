@@ -36,7 +36,7 @@ function WebAuth(options) {
     scope: { optional: true, type: 'string', message: 'scope is not valid' },
     audience: { optional: true, type: 'string', message: 'audience is not valid' },
     leeway: { optional: true, type: 'number', message: 'leeway is not valid' },
-    plugins: { optional: true, type: 'array', message: 'plugins is not valid'}
+    plugins: { optional: true, type: 'array', message: 'plugins is not valid'},
     _disableDeprecationWarnings: { optional: true, type: 'boolean', message: '_disableDeprecationWarnings option is not valid' },
     _sendTelemetry: { optional: true, type: 'boolean', message: '_sendTelemetry option is not valid' },
     _telemetryInfo: { optional: true, type: 'object', message: '_telemetryInfo option is not valid' }
