@@ -53,6 +53,12 @@ Popup.prototype.authorize = function (options, cb) {
   var url;
   var relayUrl;
 
+  var plugin = this.baseOptions.plugins('popup.authorize');
+
+  if (plugin) {
+    plugin.init();
+  }
+
   var params = objectHelper.merge(this.baseOptions, [
     'clientID',
     'scope',
