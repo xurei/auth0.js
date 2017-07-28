@@ -30,3 +30,4 @@ example/auth0.js
 coverage
 
 .idea/
+*.iml
